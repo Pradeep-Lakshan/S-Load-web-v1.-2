@@ -1,0 +1,6 @@
+{
+  "name": "VortexFetch - Social Media Video Downloader",
+  "description": "High-speed, clean social media video and audio downloader for YouTube, TikTok, Instagram, X/Twitter, Facebook, Reddit, and Vimeo.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

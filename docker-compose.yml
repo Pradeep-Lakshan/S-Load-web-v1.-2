@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: vortxfetch-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - MAX_DURATION_SECONDS=1800
+      - MAX_FILESIZE_MB=500
+      - RATE_LIMIT_PER_MIN=10
+      - TEMP_DIR=/tmp/vortxfetch_media
+      - ALLOWED_ORIGINS=http://localhost:3000,http://frontend:3000
+      - ENABLE_CAPTCHA=false
+    volumes:
+      - media_temp:/tmp/vortxfetch_media
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2048M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - vortxfetch-net
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vortxfetch-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - BACKEND_URL=http://backend:8000
+      - VITE_TURNSTILE_SITE_KEY=1x00000000000000000000AA
+    depends_on:
+      backend:
+        condition: service_healthy
+    networks:
+      - vortxfetch-net
+
+volumes:
+  media_temp:
+    driver: local
+
+networks:
+  vortxfetch-net:
+    driver: bridge
